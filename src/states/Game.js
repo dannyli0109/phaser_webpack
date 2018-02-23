@@ -16,11 +16,9 @@ export default class extends Phaser.State {
 
     this.load.spritesheet('phaser', '../../assets/images/pacman.png', 16, 16)
 
-
     this.load.tilemap('maze', '../../assets/images/maze_wall.csv');
     
     this.load.image('maze-img', '../../assets/images/maze.png')
-    
   }
 
   create () {
@@ -29,93 +27,114 @@ export default class extends Phaser.State {
     this.physics.startSystem(Phaser.Physics.ARCADE);  
     player = this.add.sprite(8, 40, 'phaser');
     this.physics.arcade.enable(player);
+    // player.anchor.set(0.5);
+    
     // player.scale(0.2)
     player.animations.add('right', [0, 1, 2], 10, true)
     player.animations.add('left', [3, 4, 5], 10, true)
     player.animations.add('up', [6, 7, 8], 10, true)
     player.animations.add('down', [9, 10, 11], 10, true)
+    player.animations.add('idel', [2], 10, true)
     player.body.collideWorldBounds = true
 
     // this.physics.arcade.gravity.y = 20;
 
     this.map = this.add.tilemap('maze', 8, 8)
     this.map.addTilesetImage('maze-img')
-    this.map.setCollisionByExclusion([-1, 0])    
+    this.map.setCollisionByExclusion([-1])    
     this.layer = this.map.createLayer(0);
     this.layer.resizeWorld()
 
-    // this.layer.resizeWorld()
-
-    // this.map = this.add.tilemap('maze')
-
-    // this.map.addTilesetImage('mmm', 'maze-img')
-
-    // this.layer = this.map.createLayer("layer01");
-    
-
-
-    // this.add.image(0, 0, 'maze')
-    // let map = this.add.tilemap()
-    // map.addTilesetImage('maze')
-
-    // let layer = map.create("Level1", 40, 30, 32, 32)
-    // layer.resizeWorld();
-    
-
-    // graphics = this.make.graphics()
-    // graphics.lineStyle(2, 0xFFFFFF, 1);
-    // graphics.drawRect(200, 200, 250, 250);
-
-    // group = this.add.group()
-    // this.physics.arcade.enable(group)
-    // this.physics.add.collider(player, group)
-
-    // group.add(graphics)
-
-    console.log()
-
-
     cursors = this.input.keyboard.createCursorKeys();
+    console.log(player.body)
+    
   }
 
   update () {
+    this.physics.arcade.collide(player, this.layer, this.collisionHandler)
 
-    this.physics.arcade.collide(player, this.layer)
-    if (cursors.left.isDown) {
-      player.body.velocity.x = -50
-      player.body.velocity.y = 0      
-      player.animations.play('left')
-    } else if (cursors.right.isDown) {
-      player.body.velocity.x = 50
-      player.body.velocity.y = 0
-      player.animations.play('right')
-    } else if (cursors.up.isDown) {
-      player.body.velocity.y = -50
-      player.body.velocity.x = 0
-      player.animations.play('up')
-    } else if (cursors.down.isDown) {
-        if (!player.body.blocked.down) {
-            player.body.velocity.y = 50
-            player.body.velocity.x = 0
-            player.animations.play('down')            
+      if (this.lastPressed) {
+        if (this.lastPressed == 0) {
+          player.body.velocity.x = -50          
+        } else if (this.lastPressed == 1) {
+          player.body.velocity.x = 50          
+        } else if (this.lastPressed == 2) {
+          player.body.velocity.y = -50      
+        } else {
+          player.body.velocity.y = 50
         }
+      }
 
-    }   
-
-    // console.log(player.body.touching)
-    // player.x = Math.round(player.x)
-    // player.x = Math.round(player.y)
     
-    // this.physics.arcade.collide(player, graphics, this.collisionHandler, null, this)
-    console.log(player.body)
+      if (cursors.left.isDown) {
+        player.body.velocity.x = -50
+        this.lastPressed = 0
+      } else if (cursors.right.isDown) {
+        player.body.velocity.x = 50
+        this.lastPressed = 1        
+      } else if (cursors.up.isDown) {
+        player.body.velocity.y = -50
+        this.lastPressed = 2        
+      } else if (cursors.down.isDown) {
+        player.body.velocity.y = 50
+        this.lastPressed = 3        
+      }
+
+      
+    if (player.body.blocked.up || player.body.blocked.right || player.body.blocked.down || player.body.blocked.left) {
+      // player.animations.stop();
+      return;      
+    }
+    
+    if (player.body.position.x > player.body.prev.x) {
+      player.animations.play('right')
+    } else if (player.body.position.x < player.body.prev.x) {
+      player.animations.play('left')      
+    } else if (player.body.position.y > player.body.prev.y) {
+      player.animations.play('down')      
+    } else if (player.body.position.y < player.body.prev.y) {
+      player.animations.play('up')            
+    }  else {
+      player.animations.stop();
+    }
+
+ 
+
+    console.log(player.body.position.x, player.body.position.y)
+    console.log(player.body.prev.x, player.body.prev.y)
+    console.log(player.body.blocked)
+
+
+
+
+    
   }
 
-  collisionHandler() {
-      console.log('hi')
+  collisionHandler(obj1, obj2) {
+    // if (player.body.velocity.x < 0) {
+    //   player.animations.play('left')      
+    // } else if (player.body.velocity.x > 0) {
+    //   player.animations.play('right')            
+    // } else if (player.body.velocity.y > 0) {
+    //   player.animations.play('down')
+    // } else if (player.body.velocity.y < 0) {
+    //   player.animations.play('up')
+    // } else {
+    //   player.animations.stop()      
+    // }
+    console.log(obj1.body)
+
+    
   }
+
+  // processCallback(obj1, obj2) {
+  //   console.log(obj1, obj2,2)
+  // }
 
   render () {
-    
+    // this.game.debug.body(player)
+    // this.game.debug.body(this.layer)
+    this.game.debug.bodyInfo(player, 32, 300)
     
   }
 }
