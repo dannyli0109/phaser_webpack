@@ -28,6 +28,7 @@ export default class extends Phaser.State {
     player = this.add.sprite(8, 40, 'phaser');
     this.physics.arcade.enable(player);
     // player.anchor.set(0.5);
+    player.body.setSize(16,16,0,0)
     
     // player.scale(0.2)
     player.animations.add('right', [0, 1, 2], 10, true)
@@ -44,6 +45,11 @@ export default class extends Phaser.State {
     this.map.setCollisionByExclusion([-1])    
     this.layer = this.map.createLayer(0);
     this.layer.resizeWorld()
+    // this.layer.body.immovable = true;
+    this.physics.arcade.enable(this.layer);
+    this.layer.body.immovable = true;
+
+    
 
     cursors = this.input.keyboard.createCursorKeys();
     console.log(player.body)
@@ -52,10 +58,10 @@ export default class extends Phaser.State {
 
   update () {
     this.physics.arcade.collide(player, this.layer, this.collisionHandler)
-
+      // console.log(this.lastPressed)
       if (this.lastPressed) {
         if (this.lastPressed == 0) {
-          player.body.velocity.x = -50          
+          player.body.velocity.x = -50                  
         } else if (this.lastPressed == 1) {
           player.body.velocity.x = 50          
         } else if (this.lastPressed == 2) {
@@ -64,6 +70,8 @@ export default class extends Phaser.State {
           player.body.velocity.y = 50
         }
       }
+
+      // console.log(this.lastPressed, player.body.velocity.x)
 
     
       if (cursors.left.isDown) {
@@ -98,11 +106,15 @@ export default class extends Phaser.State {
       player.animations.stop();
     }
 
+    // console.log(Phaser.Rectangle.intersects(player, this.layer))
+
+    
+
  
 
-    console.log(player.body.position.x, player.body.position.y)
-    console.log(player.body.prev.x, player.body.prev.y)
-    console.log(player.body.blocked)
+    // console.log(player.body.position.x, player.body.position.y)
+    // console.log(player.body.prev.x, player.body.prev.y)
+    // console.log(player.body.blocked)
 
 
 
@@ -111,20 +123,19 @@ export default class extends Phaser.State {
   }
 
   collisionHandler(obj1, obj2) {
-    // if (player.body.velocity.x < 0) {
-    //   player.animations.play('left')      
-    // } else if (player.body.velocity.x > 0) {
-    //   player.animations.play('right')            
-    // } else if (player.body.velocity.y > 0) {
-    //   player.animations.play('down')
-    // } else if (player.body.velocity.y < 0) {
-    //   player.animations.play('up')
-    // } else {
-    //   player.animations.stop()      
-    // }
-    console.log(obj1.body)
 
-    
+    if (this.lastPressed) {
+      if (this.lastPressed == 0) {
+        // player.body.velocity.x = -50 
+        player.body.velocity.x = -50                  
+      } else if (this.lastPressed == 1) {
+        player.body.velocity.x = 50          
+      } else if (this.lastPressed == 2) {
+        player.body.velocity.y = -50      
+      } else {
+        player.body.velocity.y = 50
+      }
+    }
   }
 
   // processCallback(obj1, obj2) {
